@@ -1,0 +1,35 @@
+<script lang="ts">
+  import { enhance } from '$app/forms';
+  import type { PageData, ActionData } from './$types';
+  let { data, form }: { data: PageData; form: ActionData } = $props();
+  let editing = $state(false);
+  const date = (value: string | Date) => new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+  const pending = $derived(data.changes.some(c => c.status === 'PENDING'));
+import Sprachassistent from '$lib/components/Sprachassistent.svelte';
+</script>
+
+<svelte:head><title>Mein Bereich | Pflegerouter </title></svelte:head>
+
+<div class="personal-dashboard">
+  <header class="heading"><div><span class="eyebrow">MEIN BEREICH</span><h1>Guten Tag, {data.recipient.firstName}!</h1><p>Hier finden Sie Ihre Hilfsanfragen, Termine und Informationen Ihrer Organisation.</p></div></header>
+  <div class="stats">
+   <Sprachassistent />
+    <article class="stat"><span class="symbol">♡</span><span>Meine Hilfsanfragen</span><strong>{data.requests.length}</strong><small>Die letzten 20 Anfragen</small></article>
+    <article class="stat"><span class="symbol">▤</span><span>Meine Termine</span><strong>{data.appointments.length}</strong><small>Die nächsten 20 Termine</small></article>
+  </div>
+  <section class="panel"><h2>Meine Organisation</h2>{#if data.organization}<strong>{data.organization.name}</strong><p>{data.organization.contactEmail ?? 'Keine Kontakt-E-Mail hinterlegt'}</p>{:else}<p>Keine Organisation gefunden.</p>{/if}</section>
+  <section class="panel"><h2>Meine Hilfsanfragen</h2>{#if data.requests.length}{#each data.requests as item (item.id)}<div class="entry"><div><strong>{item.title}</strong><small>Erstellt am {date(item.createdAt)}</small></div><span class="status">{item.status}</span></div>{/each}{:else}<p>Sie haben noch keine Hilfsanfragen.</p>{/if}</section>
+  <section class="panel"><h2>Meine nächsten Termine</h2>{#if data.appointments.length}{#each data.appointments as item (item.id)}<div class="entry"><div><strong>{item.title}</strong><small>{date(item.startsAt)} · {item.status}</small></div><span class="calendar">▤</span></div>{/each}{:else}<p>Zurzeit sind keine Termine geplant.</p>{/if}</section>
+  <section class="panel"><div class="panel-head"><h2>Meine persönlichen Daten</h2>{#if pending}<span class="pending">Änderung wartet auf Freigabe</span>{/if}</div>
+    <div class="details"><div><small>Vorname</small><strong>{data.recipient.firstName}</strong></div><div><small>Nachname</small><strong>{data.recipient.lastName}</strong></div><div><small>E-Mail</small><strong>{data.recipient.email ?? 'Nicht hinterlegt'}</strong></div><div><small>Telefon</small><strong>{data.recipient.phone ?? 'Nicht hinterlegt'}</strong></div><div><small>Straße und Hausnummer</small><strong>{data.recipient.addressLine ?? 'Nicht hinterlegt'}</strong></div><div><small>Postleitzahl / Ort</small><strong>{data.recipient.postalCode ?? ''} {data.recipient.city ?? ''}</strong></div></div>
+    <p class="hint">Korrekturen werden erst nach Genehmigung durch Ihre Organisation übernommen. Änderungen an Ihrer Login-E-Mail-Adresse werden separat geprüft.</p>
+    {#if form?.message}<p class="feedback" role="status">{form.message}</p>{/if}
+    {#if !editing && !pending}<button class="primary" onclick={() => editing = true}>Änderungen vorschlagen</button>{/if}
+    {#if editing && !pending}<form method="POST" action="?/proposeChange" use:enhance={() => async ({ update }) => { await update(); }}><div class="form-grid"><label>Vorname<input name="firstName" required maxlength="100" value={data.recipient.firstName}/></label><label>Nachname<input name="lastName" required maxlength="100" value={data.recipient.lastName}/></label><label>Telefon<input name="phone" maxlength="40" value={data.recipient.phone ?? ''}/></label><label>Straße und Hausnummer<input name="addressLine" maxlength="250" value={data.recipient.addressLine ?? ''}/></label><label>Postleitzahl<input name="postalCode" maxlength="20" value={data.recipient.postalCode ?? ''}/></label><label>Ort<input name="city" maxlength="120" value={data.recipient.city ?? ''}/></label></div><div class="actions"><button class="primary" type="submit">Zur Prüfung senden</button><button class="secondary" type="button" onclick={() => editing = false}>Abbrechen</button></div></form>{/if}
+    {#if data.changes.length}<h3>Meine Änderungsanträge</h3>{#each data.changes as change (change.id)}<div class="entry"><div><strong>{change.status === 'PENDING' ? 'In Prüfung' : change.status === 'APPROVED' ? 'Genehmigt' : 'Abgelehnt'}</strong><small>{date(change.createdAt)}{change.reviewNote ? ` · ${change.reviewNote}` : ''}</small></div></div>{/each}{/if}
+  </section>
+</div>
+
+<style>
+  .personal-dashboard{max-width:1050px;margin:auto;padding:34px 28px 70px;color:#172b4d}.eyebrow{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#4686d6}.heading{margin-bottom:26px}.heading h1{font-size:30px;letter-spacing:-.7px;margin:9px 0}.heading p,.panel p{color:#6c7d94;line-height:1.6}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:20px}.stat,.panel{background:white;border:1px solid #e8eef6;border-radius:17px;box-shadow:0 5px 20px rgba(20,60,110,.035)}.stat{padding:24px;display:flex;flex-direction:column;gap:8px}.stat .symbol{font-size:28px;color:#246fca}.stat span:not(.symbol){font-size:13px;color:#6c7d94}.stat strong{font-size:36px;color:#1649a0}.stat small,.entry small,.details small{color:#8794a8}.panel{padding:25px;margin-bottom:20px}.panel h2{font-size:19px;margin:0 0 20px}.panel h3{font-size:15px;margin:24px 0 10px}.panel>strong{color:#1649a0}.entry{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;border-top:1px solid #edf1f7}.entry strong,.entry small{display:block}.entry small{font-size:12px;margin-top:6px}.status,.pending{background:#e7f0ff;color:#1649a0;border-radius:30px;padding:7px 11px;font-size:12px;font-weight:700}.pending{background:#fff5de;color:#916000}.calendar{color:#2477d5;font-size:23px}.panel-head{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}.details,.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}.details>div{padding:12px 0;border-bottom:1px solid #edf1f7}.details strong,.details small{display:block;overflow-wrap:anywhere}.details strong{margin-top:7px;font-size:14px}.hint{font-size:13px}.feedback{background:#eef6ff;padding:12px;border-radius:10px}.primary,.secondary{border:0;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer}.primary{background:#1655ad;color:white}.secondary{background:#edf2f8;color:#23446e}.form-grid label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:700}.form-grid input{width:100%;border:1px solid #d7e2f0;border-radius:9px;padding:11px;font:inherit}.actions{display:flex;gap:10px;margin-top:20px}@media(max-width:620px){.personal-dashboard{padding:20px 14px 50px}.heading h1{font-size:24px}.stats,.details,.form-grid{grid-template-columns:1fr}.panel{padding:19px}}
+</style>

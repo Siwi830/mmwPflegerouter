@@ -1,0 +1,1 @@
+ALTER TABLE "help_requests" ADD COLUMN "priority" varchar(16) DEFAULT 'NORMAL' NOT NULL;

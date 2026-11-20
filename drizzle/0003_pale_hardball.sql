@@ -1,0 +1,1 @@
+ALTER TABLE "care_recipients" ADD COLUMN "email" varchar(320);
