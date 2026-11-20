@@ -45,7 +45,7 @@ function togglePriority(priority: string) {
 </script>
 
 <svelte:head>
-  <title>Dashboard | miteinander.</title>
+  <title>Dashboard | Pflegerouter</title>
   <meta
     name="description"
     content="Dein Dashboard für Nachbarschaftshilfe und Ehrenamt."

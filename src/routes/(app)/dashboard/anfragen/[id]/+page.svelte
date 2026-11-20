@@ -9,7 +9,7 @@
   const statuses = [['OPEN', 'Unbearbeitet'], ['MATCHED', 'Zugeordnet'], ['IN_PROGRESS', 'In Bearbeitung'], ['COMPLETED', 'Erledigt'], ['CANCELLED', 'Abgebrochen']];
 </script>
 
-<svelte:head><title>{data.request.title} | miteinander.</title></svelte:head>
+<svelte:head><title>{data.request.title} | </title></svelte:head>
 <main class="wrap">
   <a href="/dashboard" class="back">← Zurück zum Dashboard</a>
   <div class="heading">

@@ -15,7 +15,7 @@
     (form.elements.namedItem('endsAtIso') as HTMLInputElement).value = endsLocal ? new Date(endsLocal).toISOString() : '';
   }
 </script>
-<svelte:head><title>Termine | miteinander.</title></svelte:head>
+<svelte:head><title>Termine | .</title></svelte:head>
 <div class="page">
   <header><div><p class="eyebrow">{data.organizationName}</p><h1>Termine</h1><p>Termine zu Hilfegesuchen und eigenständige Begegnungen.</p></div><a href="/dashboard/anfragen">← Hilfsanfragen</a></header>
   {#if data.canManage}
